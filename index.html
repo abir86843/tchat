@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TChat - Gemini Powered Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'primary': {
+                '50': '#eff6ff',
+                '100': '#dbeafe',
+                '200': '#bfdbfe',
+                '300': '#93c5fd',
+                '400': '#60a5fa',
+                '500': '#3b82f6',
+                '600': '#2563eb',
+                '700': '#1d4ed8',
+                '800': '#1e40af',
+                '900': '#1e3a8a',
+                '950': '#172554',
+              },
+            }
+          }
+        }
+      }
+    </script>
+  <style>
+      /* Tech-inspired background */
+      body {
+        background-color: #f9fafb; /* gray-50 */
+        background-image: radial-gradient(#dbeafe 1px, transparent 1px);
+        background-size: 16px 16px;
+      }
+      .dark body {
+        background-color: #030712; /* gray-950 */
+        background-image: radial-gradient(#1e3a8a 1px, transparent 1px);
+        background-size: 16px 16px;
+      }
+      /* Ensure root div has transparent background to see body background */
+      #root, .bg-gray-50, .dark .bg-gray-900 {
+          background-color: transparent !important;
+      }
+
+      /* Custom scrollbar for Webkit (Chrome, Safari) */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #d1d5db; /* gray-300 */
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #9ca3af; /* gray-400 */
+      }
+
+      /* Dark mode scrollbar for Webkit */
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #4b5563; /* gray-600 */
+      }
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #6b7280; /* gray-500 */
+      }
+      
+      /* Custom scrollbar for Firefox */
+      .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #d1d5db transparent; /* thumb track */
+      }
+      .dark .custom-scrollbar {
+         scrollbar-color: #4b5563 transparent;
+      }
+      
+      /* Markdown rendering styles */
+      .markdown-content pre {
+        background-color: #1f2937; /* gray-800 */
+        color: #d1d5db; /* gray-300 */
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        font-family: 'Courier New', Courier, monospace;
+      }
+      .dark .markdown-content pre {
+        background-color: #111827; /* gray-900 */
+      }
+       .markdown-content code:not(pre > code) {
+        background-color: #e5e7eb; /* gray-200 */
+        color: #1f2937; /* gray-800 */
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        border-radius: 6px;
+      }
+      .dark .markdown-content code:not(pre > code) {
+        background-color: #374151; /* gray-700 */
+        color: #f3f4f6; /* gray-100 */
+      }
+       .markdown-content ul, .markdown-content ol {
+        padding-left: 1.5rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+       .markdown-content li {
+        margin-bottom: 0.25rem;
+      }
+       .markdown-content a {
+        color: #2563eb; /* primary-600 */
+        text-decoration: underline;
+      }
+      .dark .markdown-content a {
+        color: #60a5fa; /* primary-400 */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body class="bg-white dark:bg-gray-900">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "TChat",
+  "description": "An intelligent chatbot application powered by Gemini. It supports text-based conversations, complex query analysis with a 'thinking mode', image analysis from user uploads, and AI image generation with aspect ratio controls. The app also features an admin panel and a dark/light mode toggle.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
