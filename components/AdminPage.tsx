@@ -59,6 +59,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
             lastLogin: null, 
             knowledge: '', 
             planEndDate: undefined,
+            imageUsage: { count: 0, lastReset: now },
             researchUsage: { count: 0, lastReset: now },
             videoUsage: { count: 0, lastReset: now }
         }];
@@ -139,6 +140,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                             <th scope="col" className="px-6 py-3">Role</th>
                             <th scope="col" className="px-6 py-3">Plan</th>
                             <th scope="col" className="px-6 py-3">Plan End Date</th>
+                            <th scope="col" className="px-6 py-3">Images Used</th>
                             <th scope="col" className="px-6 py-3">Videos Summarized</th>
                             <th scope="col" className="px-6 py-3">Last Login</th>
                             <th scope="col" className="px-6 py-3">Actions</th>
@@ -156,6 +158,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">{user.plan !== 'Free' && user.planEndDate ? new Date(user.planEndDate).toLocaleDateString() : 'N/A'}</td>
+                                <td className="px-6 py-4">{user.imageUsage?.count ?? 0}</td>
                                 <td className="px-6 py-4">{user.videoUsage?.count ?? 0}</td>
                                 <td className="px-6 py-4">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
                                 <td className="px-6 py-4 flex items-center space-x-3">

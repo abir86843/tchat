@@ -54,6 +54,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ onUserLoginSuccess, onAdminLoginSuc
             lastLogin: now,
             knowledge: '',
             plan: 'Free',
+            imageUsage: {
+                count: 0,
+                lastReset: now,
+            },
             researchUsage: {
                 count: 0,
                 lastReset: now,

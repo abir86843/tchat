@@ -102,11 +102,11 @@ const ChatPage: React.FC<ChatPageProps> = ({ isSidebarOpen, setSidebarOpen }) =>
   const activeConversation = conversations.find(c => c.id === activeConversationId);
   const messages = activeConversation?.messages ?? [];
 
-  const planLimits: Record<Plan, { research: number; video: number }> = {
-    'Free': { research: 3, video: 2 },
-    'Pro': { research: 26, video: Infinity },
-    'Business': { research: 70, video: Infinity },
-    'Enterprise': { research: 136, video: Infinity },
+  const planLimits: Record<Plan, { research: number; video: number; image: number; }> = {
+    'Free': { research: 3, video: 2, image: 5 },
+    'Pro': { research: 26, video: 10, image: 50 },
+    'Business': { research: 70, video: 50, image: 200 },
+    'Enterprise': { research: 136, video: Infinity, image: Infinity },
   };
 
   const handleNewChat = useCallback(() => {
@@ -394,7 +394,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ isSidebarOpen, setSidebarOpen }) =>
       updateMessages(prev => prev.map(msg => msg.id === botMessage.id ? { ...msg, ...updater(msg) } : msg));
     };
 
-    const checkUsage = (usageType: 'research' | 'video'): boolean => {
+    const checkUsage = (usageType: 'research' | 'video' | 'image'): boolean => {
         const users: AppUser[] = JSON.parse(localStorage.getItem('tchat_users') || '[]');
         const userIndex = users.findIndex(u => u.email === currentUser?.email);
 
@@ -405,7 +405,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ isSidebarOpen, setSidebarOpen }) =>
 
         let user = users[userIndex];
         const now = new Date();
-        const usageKey = usageType === 'research' ? 'researchUsage' : 'videoUsage';
+        const usageKey = usageType === 'research' ? 'researchUsage' : usageType === 'video' ? 'videoUsage' : 'imageUsage';
         let usageData = user[usageKey];
 
         if (!usageData) {
@@ -421,7 +421,12 @@ const ChatPage: React.FC<ChatPageProps> = ({ isSidebarOpen, setSidebarOpen }) =>
 
         const limit = planLimits[user.plan][usageType];
         if (usageData.count >= limit) {
-            const message = `You have exceeded your monthly ${usageType === 'video' ? 'video summarization' : usageType} limit (${limit} uses). Please upgrade for more.`;
+            // FIX: Explicitly type `featureName` as string to allow assigning more descriptive names for the error message.
+            let featureName: string = usageType;
+            if (usageType === 'video') featureName = 'video summarization';
+            if (usageType === 'image') featureName = 'image generation/editing';
+
+            const message = `You have exceeded your monthly ${featureName} limit (${limit} uses). Please upgrade for more.`;
             updateBotMessage(() => ({ text: message, isLoading: false }));
             return false;
         }
@@ -452,10 +457,12 @@ const ChatPage: React.FC<ChatPageProps> = ({ isSidebarOpen, setSidebarOpen }) =>
             const { text, sources } = await sendMessageWithGoogleSearch(currentContents, currentUser?.knowledge);
             updateBotMessage(() => ({ text, sources, isLoading: false }));
         } else if (userMessageText.startsWith('/imagine')) {
+             if (!checkUsage('image')) { setIsGenerating(false); return; }
              const prompt = userMessageText.replace('/imagine', '').trim();
              const imageUrl = await generateImage(prompt, aspectRatio);
              updateBotMessage(() => ({ text: `Generated image for: "${prompt}"`, imageUrl, isLoading: false }));
         } else if (activeConversation.isEditMode && fileToProcess) {
+             if (!checkUsage('image')) { setIsGenerating(false); return; }
              if (!userMessageText) {
                 updateBotMessage(() => ({ text: "Please provide instructions on how to edit the image.", isLoading: false }));
                 setFilePreview(filePreview); setUploadedFile(fileToProcess); // Restore file for user

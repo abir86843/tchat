@@ -7,17 +7,65 @@ interface ProfilePageProps {
   onNavigateToChat: () => void;
 }
 
-const planDetails: Record<Plan, { name: string; price: string; research: string; videos: string; features: string[] }> = {
-    'Free': { name: 'Free', price: '0TK/Month', research: '3 Research/Month', videos: '2 Videos/Month', features: ['Standard AI model', 'Basic chat history', 'Video Summaries'] },
-    'Pro': { name: 'Pro', price: '499TK/Month', research: '26 Research/Month', videos: 'Unlimited', features: ['Advanced AI model (Thinking)', 'Priority support'] },
-    'Business': { name: 'Business', price: '899TK/Month', research: '70 Research/Month', videos: 'Unlimited', features: ['All Pro features', 'Increased limits', 'Team features (soon)'] },
-    'Enterprise': { name: 'Enterprise', price: '1599TK/Month', research: '136 Research/Month', videos: 'Unlimited', features: ['All Business features', 'Highest limits', 'Custom solutions'] }
+const planDetails: Record<Plan, { name: string; price: string; description: string; features: string[] }> = {
+    'Free': { 
+        name: 'Free', 
+        price: '0TK/Month', 
+        description: 'Perfect for getting started with TChat.',
+        features: [
+            'Standard AI Model', 
+            'Google Search Integration',
+            '5 Image Generations/Edits per month',
+            '3 Research Queries per month',
+            '2 Video Summaries per month',
+            'Live Audio Conversations',
+            'Personalized AI Knowledge',
+        ] 
+    },
+    'Pro': { 
+        name: 'Pro', 
+        price: '499TK/Month', 
+        description: 'For professionals who need more power.',
+        features: [
+            'Includes all Free plan features',
+            'Access to Advanced AI Model (Thinking Mode)',
+            '50 Image Generations/Edits per month',
+            '26 Research Queries per month',
+            '10 Video Summaries per month',
+            'Priority Support',
+        ] 
+    },
+    'Business': { 
+        name: 'Business', 
+        price: '899TK/Month', 
+        description: 'For teams and frequent users.',
+        features: [
+            'Includes all Pro plan features',
+            '200 Image Generations/Edits per month',
+            '70 Research Queries per month',
+            '50 Video Summaries per month',
+            'Team features (coming soon)',
+        ] 
+    },
+    'Enterprise': { 
+        name: 'Enterprise', 
+        price: '1599TK/Month', 
+        description: 'For organizations with custom needs.',
+        features: [
+            'Includes all Business plan features',
+            'Unlimited Image Generations/Edits',
+            '136 Research Queries per month',
+            'Unlimited Video Summaries',
+            'Custom Solutions & Integrations',
+        ] 
+    }
 };
-const limits: Record<Plan, { research: number; video: number; }> = {
-    'Free': { research: 3, video: 2 },
-    'Pro': { research: 26, video: Infinity },
-    'Business': { research: 70, video: Infinity },
-    'Enterprise': { research: 136, video: Infinity },
+
+const limits: Record<Plan, { research: number; video: number; image: number }> = {
+    'Free': { research: 3, video: 2, image: 5 },
+    'Pro': { research: 26, video: 10, image: 50 },
+    'Business': { research: 70, video: 50, image: 200 },
+    'Enterprise': { research: 136, video: Infinity, image: Infinity },
 };
 
 type Feedback = { type: 'success' | 'error'; message: string } | null;
@@ -26,7 +74,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateToChat }) => {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [formData, setFormData] = useState({ name: '', knowledge: '' });
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: ''});
-  const [usage, setUsage] = useState({ research: 0, video: 0 });
+  const [usage, setUsage] = useState({ research: 0, video: 0, image: 0 });
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [isGeneratingKnowledge, setIsGeneratingKnowledge] = useState(false);
 
@@ -40,13 +88,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateToChat }) => {
         setFormData({ name: user.name || '', knowledge: user.knowledge || '' });
         
         const now = new Date();
-        const researchLastReset = new Date(user.researchUsage.lastReset);
-        const researchCount = (now.getFullYear() > researchLastReset.getFullYear() || now.getMonth() > researchLastReset.getMonth()) ? 0 : user.researchUsage.count;
+        const researchLastReset = user.researchUsage ? new Date(user.researchUsage.lastReset) : now;
+        const researchCount = (user.researchUsage && (now.getFullYear() > researchLastReset.getFullYear() || now.getMonth() > researchLastReset.getMonth())) ? 0 : user.researchUsage.count;
         
         const videoLastReset = user.videoUsage ? new Date(user.videoUsage.lastReset) : now;
         const videoCount = (user.videoUsage && (now.getFullYear() > videoLastReset.getFullYear() || now.getMonth() > videoLastReset.getMonth())) ? 0 : user.videoUsage?.count ?? 0;
 
-        setUsage({ research: researchCount, video: videoCount });
+        const imageLastReset = user.imageUsage ? new Date(user.imageUsage.lastReset) : now;
+        const imageCount = (user.imageUsage && (now.getFullYear() > imageLastReset.getFullYear() || now.getMonth() > imageLastReset.getMonth())) ? 0 : user.imageUsage?.count ?? 0;
+        
+        setUsage({ research: researchCount, video: videoCount, image: imageCount });
       }
     }
   };
@@ -121,6 +172,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateToChat }) => {
   const { plan } = currentUser;
   const currentResearchLimit = limits[plan].research;
   const currentVideoLimit = limits[plan].video;
+  const currentImageLimit = limits[plan].image;
 
   return (
     <div className="flex justify-center h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
@@ -188,14 +240,21 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateToChat }) => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Current Usage</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                  <div>
-                    <div className="flex justify-between items-center mb-1"><span className="text-sm font-medium text-gray-700 dark:text-gray-300">Research Usage (This Month)</span><span className="text-sm font-medium text-gray-500 dark:text-gray-400">{usage.research} / {currentResearchLimit}</span></div>
+                    <div className="flex justify-between items-center mb-1"><span className="text-sm font-medium text-gray-700 dark:text-gray-300">Research Usage</span><span className="text-sm font-medium text-gray-500 dark:text-gray-400">{usage.research} / {currentResearchLimit}</span></div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5"><div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${(usage.research / currentResearchLimit) * 100}%` }}></div></div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Resets monthly</p>
                 </div>
                  <div>
-                    <div className="flex justify-between items-center mb-1"><span className="text-sm font-medium text-gray-700 dark:text-gray-300">Video Summaries (This Month)</span><span className="text-sm font-medium text-gray-500 dark:text-gray-400">{usage.video} / {isFinite(currentVideoLimit) ? currentVideoLimit : '∞'}</span></div>
+                    <div className="flex justify-between items-center mb-1"><span className="text-sm font-medium text-gray-700 dark:text-gray-300">Video Summaries</span><span className="text-sm font-medium text-gray-500 dark:text-gray-400">{usage.video} / {isFinite(currentVideoLimit) ? currentVideoLimit : '∞'}</span></div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5"><div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${(usage.video / (isFinite(currentVideoLimit) ? currentVideoLimit : usage.video || 1)) * 100}%` }}></div></div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Resets monthly</p>
+                </div>
+                <div>
+                    <div className="flex justify-between items-center mb-1"><span className="text-sm font-medium text-gray-700 dark:text-gray-300">Image Generations</span><span className="text-sm font-medium text-gray-500 dark:text-gray-400">{usage.image} / {isFinite(currentImageLimit) ? currentImageLimit : '∞'}</span></div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5"><div className="bg-purple-600 h-2.5 rounded-full" style={{ width: `${(usage.image / (isFinite(currentImageLimit) ? currentImageLimit : usage.image || 1)) * 100}%` }}></div></div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Resets monthly</p>
                 </div>
             </div>
         </div>
@@ -209,9 +268,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateToChat }) => {
                         {p === plan && <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 px-3 py-1 text-sm bg-primary-500 text-white rounded-full font-semibold">Current Plan</div>}
                         <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white">{planDetails[p].name}</h3>
                         <p className="text-center text-gray-500 dark:text-gray-400 mt-2">{planDetails[p].price}</p>
-                        <div className="mt-6 mb-8 text-center"><p className="text-4xl font-extrabold text-gray-900 dark:text-white">{planDetails[p].research}</p><p className="text-sm text-gray-500 dark:text-gray-400">{planDetails[p].videos}</p></div>
-                        <ul className="space-y-4 flex-grow">
-                            {planDetails[p].features.map(feature => (<li key={feature} className="flex items-start"><CheckIcon className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" /><span className="text-sm text-gray-600 dark:text-gray-300">{feature}</span></li>))}
+                        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4 h-10">{planDetails[p].description}</p>
+                        <ul className="space-y-3 flex-grow mt-6">
+                            {planDetails[p].features.map(feature => (<li key={feature} className="flex items-start"><CheckIcon className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-600 dark:text-gray-300">{feature}</span></li>))}
                         </ul>
                         {p !== plan && (
                             <a href="https://wa.me/+8801736457957" target="_blank" rel="noopener noreferrer" className="mt-8 block w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">

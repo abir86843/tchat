@@ -36,6 +36,10 @@ export interface AppUser {
   knowledge?: string;
   plan: Plan;
   planEndDate?: string; // ISO string
+  imageUsage: {
+    count: number;
+    lastReset: string; // ISO string
+  };
   researchUsage: {
     count: number;
     lastReset: string; // ISO string

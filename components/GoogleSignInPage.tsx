@@ -25,6 +25,10 @@ const GoogleSignInPage: React.FC<GoogleSignInPageProps> = ({ onLoginSuccess }) =
                 lastLogin: now,
                 knowledge: '',
                 plan: 'Free',
+                imageUsage: {
+                    count: 0,
+                    lastReset: now,
+                },
                 researchUsage: {
                     count: 0,
                     lastReset: now,
