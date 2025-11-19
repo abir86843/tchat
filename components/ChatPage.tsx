@@ -148,11 +148,17 @@ const ChatPage: React.FC<ChatPageProps> = ({ isSidebarOpen, setSidebarOpen }) =>
 
     const stored = localStorage.getItem('tchat_conversations');
     if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.length > 0) {
-        setConversations(parsed);
-        setActiveConversationId(parsed[0].id);
-      } else {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setConversations(parsed);
+          setActiveConversationId(parsed[0].id);
+        } else {
+          handleNewChat();
+        }
+      } catch (error) {
+        console.error("Failed to parse conversations from localStorage, starting fresh.", error);
+        localStorage.removeItem('tchat_conversations'); // Clear corrupted data
         handleNewChat();
       }
     } else {

@@ -68,7 +68,7 @@ export const performResearch = async (contents: Content[], userKnowledge?: strin
     systemInstruction += `\n\nIMPORTANT CONTEXT: The user has provided the following information about themselves: "${userKnowledge}". You should use this information to personalize your responses and treat it as a primary source of truth about the user.`;
   }
 
-  const researchSystemInstruction = `You are a research assistant. Provide a comprehensive, well-structured, and factual answer based on the user's query using web search. ${systemInstruction}`;
+  const researchSystemInstruction = `You are a research assistant. Provide a comprehensive, well-structured, and factual answer based on the user's query using web search. Prioritize the most recent and relevant information. If the user's query mentions a specific year or time frame, focus your research on that period. If no time frame is given, assume the query is about the latest available information. ${systemInstruction}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-pro", // Use a more powerful model for research

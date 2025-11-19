@@ -88,16 +88,23 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateToChat }) => {
         setFormData({ name: user.name || '', knowledge: user.knowledge || '' });
         
         const now = new Date();
-        const researchLastReset = user.researchUsage ? new Date(user.researchUsage.lastReset) : now;
-        const researchCount = (user.researchUsage && (now.getFullYear() > researchLastReset.getFullYear() || now.getMonth() > researchLastReset.getMonth())) ? 0 : user.researchUsage.count;
-        
-        const videoLastReset = user.videoUsage ? new Date(user.videoUsage.lastReset) : now;
-        const videoCount = (user.videoUsage && (now.getFullYear() > videoLastReset.getFullYear() || now.getMonth() > videoLastReset.getMonth())) ? 0 : user.videoUsage?.count ?? 0;
 
-        const imageLastReset = user.imageUsage ? new Date(user.imageUsage.lastReset) : now;
-        const imageCount = (user.imageUsage && (now.getFullYear() > imageLastReset.getFullYear() || now.getMonth() > imageLastReset.getMonth())) ? 0 : user.imageUsage?.count ?? 0;
-        
-        setUsage({ research: researchCount, video: videoCount, image: imageCount });
+        const getUsageCount = (usageData?: { count: number; lastReset: string }): number => {
+          if (!usageData || !usageData.lastReset) {
+            return 0;
+          }
+          const lastReset = new Date(usageData.lastReset);
+          if (now.getFullYear() > lastReset.getFullYear() || now.getMonth() > lastReset.getMonth()) {
+            return 0;
+          }
+          return usageData.count ?? 0;
+        };
+
+        setUsage({ 
+          research: getUsageCount(user.researchUsage), 
+          video: getUsageCount(user.videoUsage), 
+          image: getUsageCount(user.imageUsage) 
+        });
       }
     }
   };
